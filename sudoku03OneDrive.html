@@ -1,0 +1,840 @@
+<html>
+<head>
+    <STYLE>
+table {
+    background-color: white;
+    border-width: medium;
+    border-color: black;
+    border-collapse: collapse;
+}
+
+td {
+    background-color: white;
+    border: #000000 solid 1px;
+    width: 24pt;
+    height: 24pt;
+    text-align: center;
+    margin: 0pt;
+    padding: 0pt;
+    border-collapse: collapse;
+}
+
+input {
+    border: solid 1px;
+    background-color: transparent;
+    padding: 0pt;
+    font-size: 16pt;
+    width: 24pt;
+    max-width: 24pt;
+    height: 24pt;
+    max-height: 24pt;
+    font-family: arial,sans-serif;
+    text-align: center;
+    border-left-style: none;
+    border-right-style: none;
+    border-top-style: none;
+    border-bottom-style: none;
+    margin: 0pt;
+    padding: 0pt;
+}
+
+
+
+button {
+    height: 24pt;
+    width: 64pt;
+    font-family: arial,sans-serif;
+    font-size: 16pt;
+}        
+
+    </STYLE>
+    <SCRIPT TYPE="text/javascript">
+
+
+function createMatrix(h, w) {
+    var m = new Array(h);
+    for (var i = 0; i < h; i++) {
+        m[i] = new Array(w);
+        for (var j = 0; j < w; j++) {
+            m[i][j] = 0;
+        }
+    }
+    return m;
+}
+
+function removeFromList(l, v) {
+    var index = l.indexOf(v);
+    if (index >= 0) {
+        l.splice(index, 1);
+    }
+    return l;
+}
+
+function iteratorForListOfList(l) {
+    this.l = l;
+    this.position = -1;
+    this.numberOfCombinations = 1;
+    for (var i = 0; i < this.l.length; i++) {
+        this.numberOfCombinations *= this.l[i].length;
+    }
+}
+
+function integerDivision(up, down) {
+    return Math.floor(up / down);
+}
+
+function sortIntList(l) {
+    return l.sort(function(a, b) {
+        return a - b
+    });
+}
+
+function integerRemainder(up, down) {
+    var div = integerDivision(up, down);
+    return up - (div * down);
+}
+
+
+function listToString(l) {
+    var s = "";
+    for (var i = 0; i < l.length; i++) {
+        if (s.length > 0) {
+            s += ",";
+        }
+        s += l[i];
+    }
+    return s;
+}
+
+
+iteratorForListOfList.prototype.next = function() {
+    this.position++;
+    if (this.position >= this.numberOfCombinations) {
+        return null;
+    }
+    var resultL = [];
+    var previousSublistLength = 1;
+    var positionPerSublist = this.position;
+    for (var i = 0; i < this.l.length; i++) {
+        positionPerSublist = integerDivision(positionPerSublist, previousSublistLength);
+        var positionInSublist = integerRemainder(positionPerSublist, l[i].length);
+        resultL.push(l[i][positionInSublist]);
+        previousSublistLength = l[i].length;
+    }
+    return resultL;
+}
+
+function IntListMatrix(h, w) {
+    this.h = h;
+    this.w = w;
+    this.m = createMatrix(h, w);
+}
+
+IntListMatrix.prototype.matrixToString = function(m, h, w) {
+    var s = "";
+    for (var i = 0; i < h; i++) {
+        for (var j = 0; j < w; j++) {
+            var n = m[i][j];
+            if (n > 0) {
+                s += n;
+            } else {
+                s += ".";
+            }
+        }
+        s += "\n";
+    }
+    return s;
+}
+
+IntListMatrix.prototype.getAt = function(i, j) {
+    return this.m[i][j];
+}
+
+IntListMatrix.prototype.setAt = function(value, i, j) {
+    this.m[i][j] = value;
+}
+
+function SudokuMatrix() {
+    this.solution = createMatrix(9, 9);
+    this.candidateList = [];
+    this.solutionCandidateIteratorPosition = 0;
+    this.acceptable = this.listToBigNumber([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    this.foundSolution = false;
+};
+
+SudokuMatrix.prototype = new IntListMatrix(9, 9);
+SudokuMatrix.prototype.parent = IntListMatrix.prototype;
+
+SudokuMatrix.prototype.listToBigNumber = function(l) {
+    l = sortIntList(l);
+    l.reverse();
+    var mult = 16;
+    var n = l[0];
+    for (var k = 1; k < l.length; k++, mult *= 16) {
+        n = n + (l[k] * mult);
+    }
+    return n;
+}
+
+SudokuMatrix.prototype.getBigNumberNotation = function(i, j, l) {
+
+    return (this.listToBigNumber(l) * 256) + (i * 16) + j;
+}
+
+SudokuMatrix.prototype.coordFromBigNumberNotation = function(n) {
+    var coord = {
+        x: (n >> 4) & 0xf,
+        y: n & 0xf
+    };
+    return coord;
+}
+
+SudokuMatrix.prototype.candidatesFromBigNumberNotation = function(n) {
+    var originaln = n;
+    var l = [];
+    n = n >> 8;
+    for (; n > 0; n = n >> 4) {
+        l.push(n & 0xf);
+    }
+    return l;
+}
+
+SudokuMatrix.prototype.numberOfCandidatesAtPosition = function(position) {
+    var l = this.candidatesFromBigNumberNotation(this.candidateList[position]);
+    return l.length;
+}
+
+SudokuMatrix.prototype.canOccurInQuadrant = function(matrix, v, i, j) {
+    var mini = Math.floor(i / 3) * 3;
+    var minj = Math.floor(j / 3) * 3;
+    for (var ii = mini; ii < mini + 3; ii++) {
+        for (var jj = minj; jj < minj + 3; jj++) {
+            if (ii != i && jj != j && matrix[ii][jj] > 0) {
+                if (matrix[ii][jj] == v) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+SudokuMatrix.prototype.canOccurInRow = function(matrix, v, i) {
+    for (var j = 0; j < this.w; j++) {
+        if (matrix[i][j] == v) {
+            return false;
+        }
+    }
+    return true;
+}
+SudokuMatrix.prototype.canOccurInColumn = function(matrix, v, j) {
+    for (var i = 0; i < this.h; i++) {
+        if (matrix[i][j] == v) {
+            return false;
+        }
+    }
+    return true;
+}
+
+SudokuMatrix.prototype.isValueAcceptable = function(m, v, i, j) {
+    return 
+		this.canOccurInQuadrant(m, v, i, j) &&
+        this.canOccurInRow(m, v, i) &&
+        this.canOccurInColumn(m, v, j);
+}
+
+SudokuMatrix.prototype.isValueAcceptableInM = function(v, i, j) {
+    return this.isValueAcceptable(this.m, v, i, j);
+}
+
+SudokuMatrix.prototype.isValueAcceptableInSolution = function(v, i, j) {
+    return this.isValueAcceptable(this.solution, v, i, j);
+}
+
+SudokuMatrix.prototype.getCandidates = function(i, j) {
+    if (this.m[i][j] > 0) {
+        return [this.m[i][j]];
+    }
+    var l = [];
+    for (var v = 1; v <= 9; v++) {
+        if (this.isValueAcceptableInM(v, i, j)) {
+            l.push(v);
+        }
+    }
+    return l;
+}
+
+SudokuMatrix.prototype.sortCandidateList = function(l) {
+    return l.sort(function(a, b) {
+        return SudokuMatrix.prototype.listToBigNumber(a.l) - SudokuMatrix.prototype.listToBigNumber(b.l);
+    });
+}
+
+SudokuMatrix.prototype.getCandidateList = function(m) {
+    this.solutionCandidateIteratorPosition = 0;
+    l = [];
+    for (var i = 0; i < this.h; i++) {
+        for (var j = 0; j < this.w; j++) {
+            if (m[i][j] == 0) {
+                var candidates = this.getCandidates(i, j);
+                l.push({
+                    i: i,
+                    j: j,
+                    l: candidates
+                });
+            }
+        }
+    }
+    return this.sortCandidateList(l);
+}
+
+SudokuMatrix.prototype.calculateNumberOfPossibleSolutions = function(listOfCandidates) {
+    var numberOfPossibleSolutions = 1;
+    for (var i = 0; i < listOfCandidates.length; i++) {
+        numberOfPossibleSolutions *= listOfCandidates[i].l.length;
+    }
+    return numberOfPossibleSolutions;
+}
+
+SudokuMatrix.prototype.candidateListToString = function(l) {
+    var s = "";
+    for (var i = 0; i < l.length; i++) {
+        s += l[i].i + "," + l[i].j + " [" + listToString(l[i].l) + "]\n";
+    }
+    return s;
+}
+
+SudokuMatrix.prototype.candidateListIterator = function(l, position) {
+
+    //console.log("\ncandidateListIterator " + position +"\n" + this.candidateListToString(l)); 
+    var resultL = [];
+    var previousSublistLength = 1;
+    for (var i = 0; i < l.length; i++) {
+        position = integerDivision(position, previousSublistLength);
+        var positionInSublist = integerRemainder(position, l[i].l.length);
+        resultL.push({
+            i: l[i].i,
+            j: l[i].j,
+            v: l[i].l[positionInSublist]
+        });
+        previousSublistLength = l[i].l.length;
+    }
+    return resultL;
+}
+
+SudokuMatrix.prototype.removeFromListOfCandidates = function(l, v, i, j) {
+    for (var k = 0; k < l.length; k++) {
+        if (l[k].i == i && l[k].j == j) {
+            l[k].l = removeFromList(l[k].l, v);
+            break;
+        }
+    }
+    return l;
+}
+
+SudokuMatrix.prototype.lowHangingFruits = function(m) {
+    var l = this.getCandidateList(m);
+    var previousSize = 0;
+    var countOfFirmNumbers = 0;
+    var previousCountOfFirmNumbers = -1;
+    while (countOfFirmNumbers != previousCountOfFirmNumbers && l.length > 0) {
+        previousCountOfFirmNumbers = countOfFirmNumbers;
+        for (var i = 0; i < l.length; i++) {
+            if (m[l[i].i][l[i].j] == 0 && l[i].l.length == 1) {
+                m[l[i].i][l[i].j] = l[i].l[0];
+                countOfFirmNumbers++;
+            }
+        }
+        l = this.getCandidateList(m);
+    }
+    return m;
+}
+
+SudokuMatrix.prototype.printFailedStatus = function(i, j, configuration, m) {
+    console.log("-----------\n" + i);
+    console.log("Failed at " + i + " " + j + " " + configuration[j].i + "," + configuration[j].j + "=" + configuration[j].v);
+    console.log(this.matrixToString(m, this.h, this.w));
+    var s = "";
+    for (var k = 0; k < configuration.length; k++) { s += configuration[k].i + "," + configuration[k].j + "=" + configuration[k].v + ";"; }
+    console.log(s);
+}
+
+
+SudokuMatrix.prototype.alreadyStartedLikeThis = function(badStarts, configuration) {
+    for (var i = 0; i < badStarts.length; i++) {
+        var isSameAsConfiguration = true;
+        for (var j = 0; j < badStarts[i].length; j++) {
+            if (badStarts[i][j].i != configuration[j].i ||
+                badStarts[i][j].j != configuration[j].j ||
+                badStarts[i][j].v != configuration[j].v) {
+                isSameAsConfiguration = false;
+                break;
+            }
+        }
+        if (isSameAsConfiguration) {
+            return true;
+        }
+    }
+    return false;
+}
+
+SudokuMatrix.prototype.copyMatrix = function(m) {
+    var newM = createMatrix(this.h, this.w);
+    for (var i = 0; i < this.h; i++) {
+        for (var j = 0; j < this.w; j++) {
+            newM[i][j] = m[i][j];
+        }
+    }
+    return newM;
+}
+
+SudokuMatrix.prototype.FindSolution = function() {
+
+    this.m = this.lowHangingFruits(this.m);
+
+    if (this.isMatrixAcceptable(this.m)) {
+        this.foundSolution = true;
+        return this.m;
+    }
+
+    var l = this.getCandidateList(this.m);
+    var badStarts = [];
+    var savedM = this.copyMatrix(this.m);
+
+    for (var i = 0; i < this.calculateNumberOfPossibleSolutions(l); i++) {
+
+        var wentThrough = true;
+        var configuration = this.candidateListIterator(l, i);
+        if (this.alreadyStartedLikeThis(badStarts, configuration)) {
+            continue;
+        }
+        var m = this.m;
+        var start = [];
+        for (var j = 0; j < configuration.length; j++) {
+            start.push(configuration[j]);
+            if (m[configuration[j].i][configuration[j].j] == 0) {
+                if (this.isValueAcceptable(m, configuration[j].v, configuration[j].i, configuration[j].j)) {
+                    m[configuration[j].i][configuration[j].j] = configuration[j].v;
+                    m = this.lowHangingFruits(m);
+                    l = this.getCandidateList(m);
+                } else {
+                    if (integerRemainder(i, 1000) == 0) {
+                        this.printFailedStatus(i, j, configuration, m);
+                    }
+                    if (j === 0) {
+                        l = this.removeFromListOfCandidates(l, configuration[j].v, configuration[j].i, configuration[j].j);
+                    }
+                    wentThrough = false;
+                    badStarts.push(start);
+                    break;
+                }
+            }
+        }
+
+        if (wentThrough == true && this.isMatrixAcceptable(m)) {
+            this.m = m;
+            this.foundSolution = true;
+            return m;
+        }
+
+        m = null;
+        this.m = null;
+        this.m = this.copyMatrix(savedM);
+        l = this.getCandidateList(this.m);
+    }
+    return null;
+}
+
+SudokuMatrix.prototype.getColumn = function(m, j) {
+    var l = [];
+    for (var i = 0; i < this.h; i++) {
+        l.push(m[i][j]);
+    }
+    return l;
+}
+
+SudokuMatrix.prototype.getRow = function(m, i) {
+    var l = [];
+    for (var j = 0; j < this.w; j++) {
+        l.push(m[i][j]);
+    }
+    return l;
+}
+
+SudokuMatrix.prototype.getQuadrant = function(m, q) {
+    var qIntDiv = Math.floor(q / 3);
+    var qRemainder = q - (qIntDiv * 3);
+    var mini = qIntDiv * 3;
+    var minj = qRemainder * 3;
+    var l = [];
+    for (var i = mini; i < mini + 3; i++) {
+        for (var j = minj; j < minj + 3; j++) {
+            l.push(m[i][j]);
+        }
+    }
+    return l;
+}
+
+SudokuMatrix.prototype.isMatrixAcceptable = function(m) {
+    for (var i = 0; i < this.h; i++) {
+        var row = this.listToBigNumber(this.getRow(m, i));
+        var col = this.listToBigNumber(this.getColumn(m, i));
+        var qua = this.listToBigNumber(this.getQuadrant(m, i));
+        if (row != this.acceptable ||
+            col != this.acceptable ||
+            qua != this.acceptable) {
+            return false;
+        }
+    }
+    this.foundSolution = true;
+    return true;
+}
+
+SudokuMatrix.prototype.isSolutionAcceptable = function() {
+    for (var i = 0; i < this.h; i++) {
+        for (var j = 0; j < this.w; j++) {
+            if (this.solution[i][j] < 1) {
+                return false;
+            }
+            if (!this.isValueAcceptableInSolution(this.m[i][j], i, j)) {
+                return false;
+            }
+        }
+    }
+    this.m = this.solution;
+    return true;
+}
+
+SudokuMatrix.prototype.solutionToString = function() {
+    var s = "  0123456789\n";
+    for (var i = 0; i < this.h; i++) {
+        s += i + " ";
+        for (var j = 0; j < this.w; j++) {
+            s += this.solution[i][j];
+        }
+        s += " " + i + "\n";
+    }
+    s += "  0123456789";
+    return s;
+}
+
+SudokuMatrix.prototype.populateLineFromString = function(i, str) {
+    for (var j = 0; j < str.length; j++) {
+        var c = str[j];
+        var l = [];
+        if (c >= "0" && c <= "9") {
+            this.m[i][j] = Number(c);
+        }
+    }
+}
+
+
+function rnd(minimum, maximum) {
+    return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+}
+
+function getNextCell(prefix, i, j) {
+    if (j < 8)
+    {
+        j++;
+    }
+    else
+    {
+        j = 0;
+        i = integerRemainder(i + 1, 9);
+    }
+    var id = prefix + i + j;
+    var x = document.getElementById(id);
+    if (x.disabled)
+    {
+        x = getNextCell(prefix, i, j);
+    }
+    return x;
+}
+
+function getCell(prefix, i, j) {
+    var id = prefix + i + j;
+    var x = document.getElementById(id);
+    return x;
+}
+
+
+function sudokuStyle() {
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            var inputCell = getCell("id", i, j);
+
+                  if (inputCell.value != "") {
+                      inputCell.style.backgroundColor = "lightgrey";
+                      inputCell.disabled = true;
+                  }
+                  else {
+                      inputCell.style.backgroundColor = "white";
+                      inputCell.disabled = false;
+                    
+                  }
+            var tdCell = getCell("td", i, j);
+            if (j == 0 || integerRemainder(j, 3) == 0) {
+                tdCell.style.borderLeftWidth = "3px";
+                tdCell.style.borderLeftColor = "black";
+                tdCell.style.borderLeftStyle = "solid";
+            }
+            if (j == 8) {
+                tdCell.style.borderRightWidth = "3px";
+                tdCell.style.borderRightColor = "black";
+                tdCell.style.borderRightStyle = "solid";
+            }
+            if (i == 8) {
+                tdCell.style.borderBottomWidth = "3px";
+                tdCell.style.borderBottomColor = "black";
+                tdCell.style.borderBottomStyle = "solid";
+            }
+            if (i == 0 || integerRemainder(i, 3) == 0) {
+                tdCell.style.borderTopWidth = "3px";
+                tdCell.style.borderTopColor = "black";
+                tdCell.style.borderTopStyle = "solid";
+            }
+        }
+    }
+}
+
+
+function randomPopulate() {
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            var inputCell = getCell("id", i, j);
+              if (rnd(0,2) == 0)
+              {
+                inputCell.value = rnd(1, 9);
+            }
+            else {
+                inputCell.value = "";
+            }
+        }
+    }
+    sudokuStyle();
+}
+
+function butGo_Click() {
+    sudokuStyle();
+    var butSolve = document.getElementById("butSolve");
+    butSolve.disabled = false;
+}
+
+function butSolve_Click(){
+    var m = new SudokuMatrix;
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            var inputCell = getCell("id", i, j);
+            if (inputCell.value != "")
+            {
+                m.setAt(Number(inputCell.value), i, j);
+            }
+        }
+    }
+    m.FindSolution();
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            var inputCell = getCell("id", i, j);
+            if (inputCell.value == "")
+            {
+                inputCell.value = m.getAt(i, j);
+            }
+        }
+    }
+}
+
+function butClear_Click(){
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            var inputCell = getCell("id", i, j);
+            inputCell.value = "";
+        }
+    }
+}
+
+function getIdPrefix(id) {
+    return id.substring(0, 2);
+}
+
+function getIdI(id) {
+    return Number(id.substring(2, 3));
+}
+
+function getIdJ(id) {
+    return Number(id.substring(3, 4));
+}
+
+function z9(n) {
+    if (n < 0) return 0;
+    if (n > 8) return 8;
+    return n;
+}
+
+
+function onInput(element) {
+    if (element.value.length > 0)
+    {
+        var prefix = getIdPrefix(element.id);
+        var i = getIdI(element.id);
+        var j = getIdJ(element.id);
+		if (element.value < "0" || element.value > "9")
+		{
+			element.value = "";
+		}
+        var nextElement = getNextCell(prefix, i, j);
+        nextElement.focus();
+    }
+}
+
+function onKeyDown(element) {
+    var key = window.event.key;
+    var prefix = getIdPrefix(element.id);
+    var i = getIdI(element.id);
+    var j = getIdJ(element.id);    
+    switch (key)
+    {
+		case "ArrowLeft":
+			j--;
+			break;
+
+		case "ArrowUp":
+			i--;
+			break;
+
+		case "ArrowRight":
+			 j++;
+			break;
+
+		case "ArrowDown":
+			i++;
+			break;        
+    }
+    i = z9(i);
+    j = z9(j);
+    var nextElement = getCell(prefix, i, j);
+    nextElement.focus();    
+}
+
+function onBlur(element) {
+
+}
+
+
+
+if (window.addEventListener)
+    window.addEventListener("load", sudokuStyle, false);
+else if (window.attachEvent)
+    window.attachEvent("onload", sudokuStyle);
+else window.onload = sudokuStyle;
+
+
+    </SCRIPT>
+</head>
+<body id="iBody">
+    <table>
+        <tr>
+            <td id="td00"><input size="2" autocomplete="off" maxlength="1" name="input00" id="id00" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td01"><input size="2" autocomplete="off" maxlength="1" name="input01" id="id01" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td02"><input size="2" autocomplete="off" maxlength="1" name="input02" id="id02" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td03"><input size="2" autocomplete="off" maxlength="1" name="input03" id="id03" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td04"><input size="2" autocomplete="off" maxlength="1" name="input04" id="id04" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td05"><input size="2" autocomplete="off" maxlength="1" name="input05" id="id05" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td06"><input size="2" autocomplete="off" maxlength="1" name="input06" id="id06" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td07"><input size="2" autocomplete="off" maxlength="1" name="input07" id="id07" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td08"><input size="2" autocomplete="off" maxlength="1" name="input08" id="id08" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td10"><input size="2" autocomplete="off" maxlength="1" name="input10" id="id10" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td11"><input size="2" autocomplete="off" maxlength="1" name="input11" id="id11" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td12"><input size="2" autocomplete="off" maxlength="1" name="input12" id="id12" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td13"><input size="2" autocomplete="off" maxlength="1" name="input13" id="id13" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td14"><input size="2" autocomplete="off" maxlength="1" name="input14" id="id14" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td15"><input size="2" autocomplete="off" maxlength="1" name="input15" id="id15" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td16"><input size="2" autocomplete="off" maxlength="1" name="input16" id="id16" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td17"><input size="2" autocomplete="off" maxlength="1" name="input17" id="id17" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td18"><input size="2" autocomplete="off" maxlength="1" name="input18" id="id18" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td20"><input size="2" autocomplete="off" maxlength="1" name="input20" id="id20" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td21"><input size="2" autocomplete="off" maxlength="1" name="input21" id="id21" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td22"><input size="2" autocomplete="off" maxlength="1" name="input22" id="id22" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td23"><input size="2" autocomplete="off" maxlength="1" name="input23" id="id23" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td24"><input size="2" autocomplete="off" maxlength="1" name="input24" id="id24" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td25"><input size="2" autocomplete="off" maxlength="1" name="input25" id="id25" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td26"><input size="2" autocomplete="off" maxlength="1" name="input26" id="id26" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td27"><input size="2" autocomplete="off" maxlength="1" name="input27" id="id27" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td28"><input size="2" autocomplete="off" maxlength="1" name="input28" id="id28" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td30"><input size="2" autocomplete="off" maxlength="1" name="input30" id="id30" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td31"><input size="2" autocomplete="off" maxlength="1" name="input31" id="id31" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td32"><input size="2" autocomplete="off" maxlength="1" name="input32" id="id32" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td33"><input size="2" autocomplete="off" maxlength="1" name="input33" id="id33" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td34"><input size="2" autocomplete="off" maxlength="1" name="input34" id="id34" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td35"><input size="2" autocomplete="off" maxlength="1" name="input35" id="id35" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td36"><input size="2" autocomplete="off" maxlength="1" name="input36" id="id36" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td37"><input size="2" autocomplete="off" maxlength="1" name="input37" id="id37" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td38"><input size="2" autocomplete="off" maxlength="1" name="input38" id="id38" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td40"><input size="2" autocomplete="off" maxlength="1" name="input40" id="id40" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td41"><input size="2" autocomplete="off" maxlength="1" name="input41" id="id41" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td42"><input size="2" autocomplete="off" maxlength="1" name="input42" id="id42" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td43"><input size="2" autocomplete="off" maxlength="1" name="input43" id="id43" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td44"><input size="2" autocomplete="off" maxlength="1" name="input44" id="id44" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td45"><input size="2" autocomplete="off" maxlength="1" name="input45" id="id45" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td46"><input size="2" autocomplete="off" maxlength="1" name="input46" id="id46" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td47"><input size="2" autocomplete="off" maxlength="1" name="input47" id="id47" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td48"><input size="2" autocomplete="off" maxlength="1" name="input48" id="id48" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td50"><input size="2" autocomplete="off" maxlength="1" name="input50" id="id50" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td51"><input size="2" autocomplete="off" maxlength="1" name="input51" id="id51" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td52"><input size="2" autocomplete="off" maxlength="1" name="input52" id="id52" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td53"><input size="2" autocomplete="off" maxlength="1" name="input53" id="id53" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td54"><input size="2" autocomplete="off" maxlength="1" name="input54" id="id54" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td55"><input size="2" autocomplete="off" maxlength="1" name="input55" id="id55" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td56"><input size="2" autocomplete="off" maxlength="1" name="input56" id="id56" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td57"><input size="2" autocomplete="off" maxlength="1" name="input57" id="id57" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td58"><input size="2" autocomplete="off" maxlength="1" name="input58" id="id58" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td60"><input size="2" autocomplete="off" maxlength="1" name="input60" id="id60" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td61"><input size="2" autocomplete="off" maxlength="1" name="input61" id="id61" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td62"><input size="2" autocomplete="off" maxlength="1" name="input62" id="id62" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td63"><input size="2" autocomplete="off" maxlength="1" name="input63" id="id63" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td64"><input size="2" autocomplete="off" maxlength="1" name="input64" id="id64" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td65"><input size="2" autocomplete="off" maxlength="1" name="input65" id="id65" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td66"><input size="2" autocomplete="off" maxlength="1" name="input66" id="id66" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td67"><input size="2" autocomplete="off" maxlength="1" name="input67" id="id67" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td68"><input size="2" autocomplete="off" maxlength="1" name="input68" id="id68" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td70"><input size="2" autocomplete="off" maxlength="1" name="input70" id="id70" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td71"><input size="2" autocomplete="off" maxlength="1" name="input71" id="id71" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td72"><input size="2" autocomplete="off" maxlength="1" name="input72" id="id72" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td73"><input size="2" autocomplete="off" maxlength="1" name="input73" id="id73" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td74"><input size="2" autocomplete="off" maxlength="1" name="input74" id="id74" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td75"><input size="2" autocomplete="off" maxlength="1" name="input75" id="id75" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td76"><input size="2" autocomplete="off" maxlength="1" name="input76" id="id76" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td77"><input size="2" autocomplete="off" maxlength="1" name="input77" id="id77" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td78"><input size="2" autocomplete="off" maxlength="1" name="input78" id="id78" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+        <tr>
+            <td id="td80"><input size="2" autocomplete="off" maxlength="1" name="input80" id="id80" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td81"><input size="2" autocomplete="off" maxlength="1" name="input81" id="id81" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td82"><input size="2" autocomplete="off" maxlength="1" name="input82" id="id82" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td83"><input size="2" autocomplete="off" maxlength="1" name="input83" id="id83" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td84"><input size="2" autocomplete="off" maxlength="1" name="input84" id="id84" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td85"><input size="2" autocomplete="off" maxlength="1" name="input85" id="id85" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td86"><input size="2" autocomplete="off" maxlength="1" name="input86" id="id86" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td87"><input size="2" autocomplete="off" maxlength="1" name="input87" id="id87" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+            <td id="td88"><input size="2" autocomplete="off" maxlength="1" name="input88" id="id88" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)" value=""></td>
+        </tr>
+    </table>
+    <button id="butGo"    name="butGo"    value="Go"    type="button" onclick="butGo_Click()"            >Start!</button>
+    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()" disabled>Solve!</button>
+	<button id="butClear" name="butClear" value="Clear" type="button" onclick="butClear_Click()"         >Clear</button>
+</body>
+</html>
