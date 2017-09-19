@@ -70,56 +70,9 @@ else window.onload = sudokuStyle;
     <script src="ocrad.js"></script>
 </head>
 <body id="iBody">
-    <script TYPE="text/javascript">
-function load_file () {
 
-    var reader = new FileReader();
-    reader.onload = function(){
-        var img = new Image();
-        img.src = reader.result;
-        img.id  = "loadedImage";
-        img.width = 240;
-        imt.height = 240;
-        img.onload = function(){
-            document.getElementById('sudokuImage').innerHTML = '';
-            document.getElementById('sudokuImage').appendChild(img);
-            var cell = document.getElementById('ocradCell');
-            var canvas = document.getElementById('ocradCanvas');
-            var context = canvas.getContext('2d');
-            var height = img.height / 9;
-            var width = img.width / 9;
-            for (var i = 0; i < 9; i++) {
-                for (var j = 0; j < 9; j++) {        
-                    var sourceX = (i * width) + (width / 4) ;
-                    var sourceY = (j * height) + (height / 4);
-console.log("load_file "+i+" "+j+" " +sourceX + " "+sourceY);
-                    context.drawImage(cell, sourceX, sourceY, width / 2, height / 2, 0, 0, width / 2, height / 2);
-/*                    
-                    OCRAD(img, function(text){
-                        var id = "id" + i.toString() + j.toString();
-                        document.getElementById(id).innerText = text;
-console.log("load_file OCRAD "+id+" "+text);
-                    });
-*/                    
-                }
-            }
-        }
-    }
-    reader.readAsDataURL(document.getElementById('picker').files[0]);
-
-}
-
-    </script>
     <!--style="sBody" class="cBody"-->
-    <div>
-        <!-- <button id="butFromFile" name="butFromFile" value="FromFile" type="button" onclick="butFromFile_Click()" >From File</button> -->
-        <div>
-            <input type="file" onchange="load_file()" id="picker">  
-            <canvas id="ocradCanvas"></canvas>
-            <img id="ocradCell">
-        </div>
-        <div id="sudokuImage" name="sudokuImage"></div>
-     </div>  
+
     <table >
         <tr>
             <td id="td00"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input00" id="id00" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
@@ -248,5 +201,58 @@ console.log("load_file OCRAD "+id+" "+text);
         </div>
     </div>
 -->    
+        <div>
+        <!-- <button id="butFromFile" name="butFromFile" value="FromFile" type="button" onclick="butFromFile_Click()" >From File</button> -->
+        <div>
+            <input type="file" onchange="load_file()" id="picker">  
+            <canvas id="ocradCanvas"></canvas>
+            <img id="ocradCell">
+        </div>
+        <div id="sudokuImageDiv" name="sudokuImageDiv">
+            <img id="sudokuImage" width="240pt" height="240pt" onload="recognize_image()">
+        </div>
+            <script TYPE="text/javascript">
+function load_file () {
+
+    var reader = new FileReader();
+    reader.onload = function(){
+        var img = document.getElementById('sudokuImage');
+        img.src = reader.result;
+    }
+    var picker = document.getElementById('picker');
+    var file = picker.files[0];
+    reader.readAsDataURL(file);
+}
+
+function recognize_image() {
+    var img = document.getElementById('sudokuImage');
+    var cell = document.getElementById('ocradCell');
+    var canvas = document.getElementById('ocradCanvas');
+    var context = canvas.getContext('2d');
+    var height = Math.round(img.height / 9);
+    var halfHeight = Math.round(height / 2);
+    var quarterHeight = Math.round(halfHeight / 2);
+    var width = Math.round(img.width / 9);
+    var halfWidth = Math.round(width / 2);
+    var quarterWidth = Math.round(halfWidth / 2);
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {        
+            var sourceX = (i * width) + quarterWidth ;
+            var sourceY = (j * height) + quarterWidth;
+console.log("load_file "+i+" "+j+" " +sourceX + " "+sourceY);
+            context.drawImage(cell, sourceX, sourceY, halfWidth, halfHeight, 0, 0, halfWidth, halfHeight);
+/*                    
+                OCRAD(img, function(text){
+                    var id = "id" + i.toString() + j.toString();
+                    document.getElementById(id).innerText = text;
+console.log("load_file OCRAD "+id+" "+text);
+                });
+*/                    
+        }
+    }
+}
+
+    </script>
+     </div>  
 </body>
 </html>
