@@ -1,0 +1,196 @@
+<html  >
+<head>
+    <STYLE>
+table {
+    background-color: white;
+    border-width: medium;
+    border-color: black;
+    border-collapse: collapse;
+}
+
+td {
+    background-color: white;
+    border: #000000 solid 1px;
+    width: 24pt;
+    height: 24pt;
+    text-align: center;
+    margin: 0pt;
+    padding: 0pt;
+    border-collapse: collapse; 
+}
+
+input.sudokuNumber {
+    border: solid 1px;
+    background-color: transparent;
+    padding: 0pt;
+    font-size: 16pt;
+    width: 24pt;
+    max-width: 24pt;
+    height: 24pt;
+    max-height: 24pt;
+    font-family: arial,sans-serif;
+    text-align: center;
+    border-left-style: none;
+    border-right-style: none;
+    border-top-style: none;
+    border-bottom-style: none;
+    margin: 0pt;
+    size: 2;
+}
+
+
+
+button {
+    height: 24pt;
+    /*width: 48pt;*/
+    font-family: arial,sans-serif;
+    font-size: 16pt;
+}        
+
+    </STYLE>
+    <SCRIPT src="sudokuSolver.js"></SCRIPT>
+
+<SCRIPT TYPE="text/javascript">
+
+
+
+if (window.addEventListener)
+    window.addEventListener("load", sudokuStyle, false);
+else if (window.attachEvent)
+    window.attachEvent("onload", sudokuStyle);
+else window.onload = sudokuStyle;
+
+
+
+    </SCRIPT>
+
+    <script src="ocrad.js"></script>
+    <script src="angular1_6_6.min.js"></script>src
+</head>
+<body id="iBody" ng-app="sudokuLK" ng-controller="sudokuLKCtrl">
+    <script>
+    var app = angular.module("sudokuLK", []);
+    app.controller("sudokuLKCtrl", ['$scope', '$log', function($scope, $log) {
+        $scope.$log = $log;
+        $scope.rows = [0,1,2,3,4,5,6,7,8];
+        $scope.cols = [0,1,2,3,4,5,6,7,8];
+        $scope.styleFor = function(row, col){
+            var style = "";
+            if (col == 0 || integerRemainder(col, 3) == 0) {
+                style = style + " border-left-width:3px; border-left-color: black; border-left-style: solid";
+            }
+            if (col == 8) {
+                style = style + " border-right-width:3px; border-right-color: black; border-right-style: solid";
+            }
+            if (row == 8) {
+                style = style + " border-bottom-width:3px; border-bottom-color: black; border-bottom-style: solid";
+            }
+            if (row == 0 || integerRemainder(row, 3) == 0) {
+                style = style + " border-top-width:3px; border-top-color: black; border-top-style: solid";
+
+            }
+            $log.log("styleFor "+row+","+col+": "+style);
+            return style;
+        };
+    }]);
+    </script>
+    <!--style="sBody" class="cBody"-->
+
+    <table >
+        <tr ng-repeat="row in rows">
+            <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
+                <input 
+                    class="sudokuNumber" 
+                    size="2" 
+                    autocomplete="off" 
+                    maxlength="1" 
+                    id="{{'id'+row+col}}" 
+                    name="{{'input'+row+col}}" 
+                    onInput="onInput(this)" 
+                    onKeyDown="onKeyDown(this)"
+                    value="">
+            <td>
+        </tr>
+    </table>
+    <button name="butGo" value="Go" type="button" onclick="butGo_Click()">Start!</button>
+    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()" disabled>Solve!</button>
+<!--    
+    <div id="capturer" name="capturer" >
+        <div id="capturerURL" name="capturerURL">
+            <input autocomplete="off" name="capturerURLText" id="capturerURLText" value="http://www.sudoku.com"     
+                    border="solid 1px"
+                    border-color="black"
+                    background-color="transparent"
+                    width="auto"
+                    max-width="216pt"
+                    padding="8pt"
+                    font-size="16pt"
+                    font-family="arial,sans-serif"
+                    text-align="left"
+                    margin="1pt">
+        </div>
+        <div id="capturerURL" name="capturerURL">
+            <button id="butCaptureFromURL" name="butCaptureFromURL" value="CaptureFromURL" type="button" onclick="butCaptureFromURL_Click()" >Load URL</button>
+            <button id="butCaptureZoomIn"  name="butCaptureZoomIn"  value="CaptureZoomIn"  type="button" onclick="butCaptureZoomIn_Click()"  >Zoom In</button>
+            <button id="butCaptureZoomOut" name="butCaptureZoomOut" value="CaptureZoomOut" type="button" onclick="butCaptureZoomOut_Click()"  >Zoom Out</button>
+        </div>
+        <div>
+            <iframe id="captureIFrame" name="captureIFrame" src="" height="320pt" width="216pt" zoom="100%" border="solid 1px" border-color="black"></iframe>
+        </div>
+    </div>
+-->    
+        <div>
+        <!-- <button id="butFromFile" name="butFromFile" value="FromFile" type="button" onclick="butFromFile_Click()" >From File</button> -->
+        <div>
+            <input type="file" onchange="load_file()" id="picker">  
+            <canvas id="ocradCanvas"></canvas>
+            <img id="ocradCell">
+        </div>
+        <div id="sudokuImageDiv" name="sudokuImageDiv">
+            <img id="sudokuImage" width="240pt" height="240pt" onload="recognize_image()">
+        </div>
+            <script TYPE="text/javascript">
+function load_file () {
+
+    var reader = new FileReader();
+    reader.onload = function(){
+        var img = document.getElementById('sudokuImage');
+        img.src = reader.result;
+    }
+    var picker = document.getElementById('picker');
+    var file = picker.files[0];
+    reader.readAsDataURL(file);
+}
+
+function recognize_image() {
+    var img = document.getElementById('sudokuImage');
+    var cell = document.getElementById('ocradCell');
+    var canvas = document.getElementById('ocradCanvas');
+    var context = canvas.getContext('2d');
+    var height = Math.round(img.height / 9);
+    var halfHeight = Math.round(height / 2);
+    var quarterHeight = Math.round(halfHeight / 2);
+    var width = Math.round(img.width / 9);
+    var halfWidth = Math.round(width / 2);
+    var quarterWidth = Math.round(halfWidth / 2);
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {        
+            var sourceX = (i * width) + quarterWidth ;
+            var sourceY = (j * height) + quarterWidth;
+console.log("load_file "+i+" "+j+" " +sourceX + " "+sourceY);
+            context.drawImage(cell, sourceX, sourceY, halfWidth, halfHeight, 0, 0, halfWidth, halfHeight);
+/*                    
+                OCRAD(img, function(text){
+                    var id = "id" + i.toString() + j.toString();
+                    document.getElementById(id).innerText = text;
+console.log("load_file OCRAD "+id+" "+text);
+                });
+*/                    
+        }
+    }
+}
+
+    </script>
+     </div>  
+</body>
+</html>
