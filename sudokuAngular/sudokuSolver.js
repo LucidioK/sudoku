@@ -519,45 +519,25 @@ function getCell(prefix, i, j) {
 
 
 function sudokuStyle() {
+
 /*    document.getElementById("sudokuTable").style.visibility = "hidden"; */
-/*
+    var sid = document.getElementById("sudokuImageDiv");
+    sid.style.display = 'none';
     for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
             var inputCell = getCell("id", i, j);
 
-                  if (inputCell.value != "") {
-                      inputCell.style.backgroundColor = "lightgrey";
-                      inputCell.disabled = true;
-                  }
-                  else {
-                      inputCell.style.backgroundColor = "white";
-                      inputCell.disabled = false;
-                    
-                  }
-            var tdCell = getCell("td", i, j);
-            if (j == 0 || integerRemainder(j, 3) == 0) {
-                tdCell.style.borderLeftWidth = "3px";
-                tdCell.style.borderLeftColor = "black";
-                tdCell.style.borderLeftStyle = "solid";
+            if (inputCell.value != "") {
+              inputCell.style.backgroundColor = "lightgrey";
+              inputCell.disabled = true;
             }
-            if (j == 8) {
-                tdCell.style.borderRightWidth = "3px";
-                tdCell.style.borderRightColor = "black";
-                tdCell.style.borderRightStyle = "solid";
-            }
-            if (i == 8) {
-                tdCell.style.borderBottomWidth = "3px";
-                tdCell.style.borderBottomColor = "black";
-                tdCell.style.borderBottomStyle = "solid";
-            }
-            if (i == 0 || integerRemainder(i, 3) == 0) {
-                tdCell.style.borderTopWidth = "3px";
-                tdCell.style.borderTopColor = "black";
-                tdCell.style.borderTopStyle = "solid";
+            else {
+              inputCell.style.backgroundColor = "white";
+              inputCell.disabled = false;
+
             }
         }
     }
-*/    
 }
 
 
@@ -584,6 +564,7 @@ function butGo_Click() {
 }
 
 function butSolve_Click(){
+    butGo_Click();
     var m = new SudokuMatrix;
     for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {

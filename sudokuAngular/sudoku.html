@@ -145,17 +145,15 @@ else window.onload = sudokuStyle;
             </td>
         </tr>
     </table>
-    <button name="butGo" value="Go" type="button" onclick="butGo_Click()">Start!</button>
-    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()" disabled>Solve!</button>
+<!--    <button name="butGo" value="Go" type="button" onclick="butGo_Click()">Start!</button> -->
+    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()">Solve!</button>
 
+    <div   >
         <div>
-        <!-- <button id="butFromFile" name="butFromFile" value="FromFile" type="button" onclick="butFromFile_Click()" >From File</button> -->
-        <div>
+            <p>Optionally, select an image from a sudoku game. It must be cropped to only the sudoku square.</p>
             <input type="file" onchange="load_file()" id="picker">  
-            <canvas id="ocradCanvas"></canvas>
-            <img id="ocradCell">
         </div>
-        <div id="sudokuImageDiv" name="sudokuImageDiv">
+        <div id="sudokuImageDiv" name="sudokuImageDiv" class="sudokuImageDiv" >
             <img id="sudokuImage" width="270pt" height="270pt" onload="recognize_image()"> 
             <table >
                 <tr ng-repeat="row in rows">
@@ -203,18 +201,16 @@ else window.onload = sudokuStyle;
                         var sourceX = (j * width) + quarterWidth - eigthWidth;
                         var sourceY = (i * height) + quarterHeight - eigthHeight;
                         context.drawImage(img, sourceX, sourceY, halfWidth + quarterWidth, halfHeight + quarterHeight, 0, 0, canvas.height, canvas.width);
-            /*                    
-                            OCRAD(img, function(text){
-                                var id = "id" + i.toString() + j.toString();
-                                document.getElementById(id).innerText = text;
-            console.log("load_file OCRAD "+id+" "+text);
-                            });
-            */                    
+                        var text = OCRAD(canvas, { numeric: true });
+                        var id = "id" + i.toString() + j.toString();
+                        var el = document.getElementById(id);
+                        el.value = text;
                     }
                 }
+                sudokuStyle();
             }
 
-    </script>
+        </script>
      </div>  
 </body>
 </html>
