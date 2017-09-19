@@ -75,24 +75,57 @@ else window.onload = sudokuStyle;
         $scope.rows = [0,1,2,3,4,5,6,7,8];
         $scope.cols = [0,1,2,3,4,5,6,7,8];
         $scope.styleFor = function(row, col){
-            var style = "";
+            var style = {};
             if (col == 0 || integerRemainder(col, 3) == 0) {
-                style = style + " border-left-width:3px; border-left-color: black; border-left-style: solid";
+                style.borderLeftWidth = "3px";
+                style.borderLeftColor = "black";
+                style.borderLeftStyle = "solid";
             }
             if (col == 8) {
-                style = style + " border-right-width:3px; border-right-color: black; border-right-style: solid";
+                style.borderRightWidth = "3px";
+                style.borderRightColor = "black";
+                style.borderRightStyle = "solid";
             }
             if (row == 8) {
-                style = style + " border-bottom-width:3px; border-bottom-color: black; border-bottom-style: solid";
+                style.borderBottomWidth = "3px";
+                style.borderBottomColor = "black";
+                style.borderBottomStyle = "solid";
             }
             if (row == 0 || integerRemainder(row, 3) == 0) {
-                style = style + " border-top-width:3px; border-top-color: black; border-top-style: solid";
-
+                style.borderTopWidth = "3px";
+                style.borderTopColor = "black";
+                style.borderTopStyle = "solid";
             }
-            $log.log("styleFor "+row+","+col+": "+style);
             return style;
         };
+
+        $scope.onKeyDown = function(key, row, col) {
+ 
+            switch (key)
+            {
+                case "ArrowLeft":
+                col--;
+                break;
+
+                case "ArrowUp":
+                row--;
+                break;
+
+                case "ArrowRight":
+                col++;
+                break;
+
+                case "ArrowDown":
+                row++;
+                break;        
+            }
+            row = z9(row);
+            col = z9(col);
+            var nextElement = getCell("id", row, col);
+            nextElement.focus();    
+        }
     }]);
+
     </script>
     <!--style="sBody" class="cBody"-->
 
@@ -107,9 +140,9 @@ else window.onload = sudokuStyle;
                     id="{{'id'+row+col}}" 
                     name="{{'input'+row+col}}" 
                     onInput="onInput(this)" 
-                    onKeyDown="onKeyDown(this)"
+                    ng-keydown="onKeyDown($event.key, row, col)"
                     value="">
-            <td>
+            </td>
         </tr>
     </table>
     <button name="butGo" value="Go" type="button" onclick="butGo_Click()">Start!</button>
