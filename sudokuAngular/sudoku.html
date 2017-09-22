@@ -36,9 +36,9 @@
             border-bottom-style: none;
             margin: 0pt;
             size: 2;
+            auto-complete: off;
+            max-length: 1;
         }
-
-
 
         button {
             height: 24pt;
@@ -56,7 +56,6 @@
 
     <SCRIPT TYPE="text/javascript">
 
-
         if (window.addEventListener)
             window.addEventListener("load", sudokuStyle, false);
         else if (window.attachEvent)
@@ -73,7 +72,7 @@
             $scope.$log = $log;
             $scope.rows = [0,1,2,3,4,5,6,7,8];
             $scope.cols = [0,1,2,3,4,5,6,7,8];
-            
+
             $scope.styleFor = function(row, col){
                 var style = {};
                 if (col == 0 || integerRemainder(col, 3) == 0) {
@@ -117,16 +116,7 @@
     <table >
         <tr ng-repeat="row in rows">
             <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
-                <input 
-                    class="sudokuNumber" 
-                    size="2" 
-                    autocomplete="off" 
-                    maxlength="1" 
-                    id="{{'id'+row+col}}" 
-                    name="{{'input'+row+col}}" 
-                    onInput="onInput(this)" 
-                    ng-keydown="onKeyDown($event.key, row, col)"
-                    value="">
+                <input class="sudokuNumber" id="{{'id'+row+col}}" name="{{'input'+row+col}}" onInput="onInput(this)" ng-keydown="onKeyDown($event.key, row, col)">
             </td>
         </tr>
     </table>
@@ -137,9 +127,10 @@
             <p>Optionally, select an image from a sudoku game. It must be cropped to only the sudoku square.</p>
             <input type="file" onchange="load_file()" id="picker">  
         </div>
+        <!-- The div below is invisible, used only for OCR -->
         <div id="sudokuImageDiv" name="sudokuImageDiv" class="sudokuImageDiv" >
             <img id="sudokuImage" width="270pt" height="270pt" onload="recognize_image()"> 
-            <table >
+            <table>
                 <tr ng-repeat="row in rows">
                     <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
                         <canvas id="{{'im'+row+col}}" name="{{'img'+row+col}}" alt="{{row+','+col}}" height="30" width="30" ></canvas>

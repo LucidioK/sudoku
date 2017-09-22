@@ -676,34 +676,6 @@ function onInput(element) {
     }
 }
 
-function onKeyDown(element) {
-    var key = window.event.key;
-    var prefix = getIdPrefix(element.id);
-    var i = getIdI(element.id);
-    var j = getIdJ(element.id);    
-    switch (key)
-    {
-                case "ArrowLeft":
-                j--;
-                break;
-
-                case "ArrowUp":
-                i--;
-                break;
-
-                case "ArrowRight":
-                 j++;
-                break;
-
-                case "ArrowDown":
-                i++;
-                break;        
-    }
-    i = z9(i);
-    j = z9(j);
-    var nextElement = getCell(prefix, i, j);
-    nextElement.focus();    
-}
 
 function onBlur(element) {
 
