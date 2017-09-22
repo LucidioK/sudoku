@@ -19,6 +19,11 @@
             border-collapse: collapse; 
         }
 
+        td:nth-child(3n+1)      { border-left-width:   3px; }
+        td:nth-child(9)         { border-right-width:  3px; }
+        tr:nth-of-type(3n+1) td { border-top-width:    3px; }
+        tr:nth-of-type(9)    td { border-bottom-width: 3px; }
+
         input.sudokuNumber {
             border: solid 1px;
             background-color: transparent;
@@ -44,7 +49,9 @@
             height: 24pt;
             font-family: arial,sans-serif;
             font-size: 16pt;
-        }        
+        }
+
+        div.mw { max-width: 240pt; }
 
     </STYLE>
 
@@ -73,31 +80,6 @@
             $scope.rows = [0,1,2,3,4,5,6,7,8];
             $scope.cols = [0,1,2,3,4,5,6,7,8];
 
-            $scope.styleFor = function(row, col){
-                var style = {};
-                if (col == 0 || integerRemainder(col, 3) == 0) {
-                    style.borderLeftWidth = "3px";
-                    style.borderLeftColor = "black";
-                    style.borderLeftStyle = "solid";
-                }
-                if (col == 8) {
-                    style.borderRightWidth = "3px";
-                    style.borderRightColor = "black";
-                    style.borderRightStyle = "solid";
-                }
-                if (row == 8) {
-                    style.borderBottomWidth = "3px";
-                    style.borderBottomColor = "black";
-                    style.borderBottomStyle = "solid";
-                }
-                if (row == 0 || integerRemainder(row, 3) == 0) {
-                    style.borderTopWidth = "3px";
-                    style.borderTopColor = "black";
-                    style.borderTopStyle = "solid";
-                }
-                return style;
-            };
-
             $scope.onKeyDown = function(key, row, col) {
                 switch (key)
                 {
@@ -115,16 +97,17 @@
 
     <table >
         <tr ng-repeat="row in rows">
-            <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
+            <td ng-repeat="col in cols"  >
                 <input class="sudokuNumber" id="{{'id'+row+col}}" name="{{'input'+row+col}}" onInput="onInput(this)" ng-keydown="onKeyDown($event.key, row, col)">
             </td>
         </tr>
     </table>
     <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()">Solve!</button>
 
-    <div>
-        <div>
-            <p>Optionally, select an image from a sudoku game. It must be cropped to only the sudoku square.</p>
+    <div >
+        <div class="mw">
+            <p width="300pt">Optionally, select an image from a sudoku game.
+            It must be cropped to only the sudoku square.</p>
             <input type="file" onchange="load_file()" id="picker">  
         </div>
         <!-- The div below is invisible, used only for OCR -->
