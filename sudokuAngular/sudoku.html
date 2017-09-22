@@ -1,133 +1,118 @@
 <html  >
 <head>
     <STYLE>
-table {
-    background-color: white;
-    border-width: medium;
-    border-color: black;
-    border-collapse: collapse;
-}
+        table {
+            background-color: white;
+            border-width: medium;
+            border-color: black;
+            border-collapse: collapse;
+        }
 
-td {
-    background-color: white;
-    border: #000000 solid 1px;
-    width: 24pt;
-    height: 24pt;
-    text-align: center;
-    margin: 0pt;
-    padding: 0pt;
-    border-collapse: collapse; 
-}
+        td {
+            background-color: white;
+            border: #000000 solid 1px;
+            width: 24pt;
+            height: 24pt;
+            text-align: center;
+            margin: 0pt;
+            padding: 0pt;
+            border-collapse: collapse; 
+        }
 
-input.sudokuNumber {
-    border: solid 1px;
-    background-color: transparent;
-    padding: 0pt;
-    font-size: 16pt;
-    width: 24pt;
-    max-width: 24pt;
-    height: 24pt;
-    max-height: 24pt;
-    font-family: arial,sans-serif;
-    text-align: center;
-    border-left-style: none;
-    border-right-style: none;
-    border-top-style: none;
-    border-bottom-style: none;
-    margin: 0pt;
-    size: 2;
-}
+        input.sudokuNumber {
+            border: solid 1px;
+            background-color: transparent;
+            padding: 0pt;
+            font-size: 16pt;
+            width: 24pt;
+            max-width: 24pt;
+            height: 24pt;
+            max-height: 24pt;
+            font-family: arial,sans-serif;
+            text-align: center;
+            border-left-style: none;
+            border-right-style: none;
+            border-top-style: none;
+            border-bottom-style: none;
+            margin: 0pt;
+            size: 2;
+        }
 
 
 
-button {
-    height: 24pt;
-    /*width: 48pt;*/
-    font-family: arial,sans-serif;
-    font-size: 16pt;
-}        
+        button {
+            height: 24pt;
+            font-family: arial,sans-serif;
+            font-size: 16pt;
+        }        
 
     </STYLE>
+
     <SCRIPT src="sudokuSolver.js"></SCRIPT>
 
-<SCRIPT TYPE="text/javascript">
+    <script src="ocrad.js"></script>
+
+    <script src="angular1_6_6.min.js"></script>
+
+    <SCRIPT TYPE="text/javascript">
 
 
-
-if (window.addEventListener)
-    window.addEventListener("load", sudokuStyle, false);
-else if (window.attachEvent)
-    window.attachEvent("onload", sudokuStyle);
-else window.onload = sudokuStyle;
-
-
+        if (window.addEventListener)
+            window.addEventListener("load", sudokuStyle, false);
+        else if (window.attachEvent)
+            window.attachEvent("onload", sudokuStyle);
+        else window.onload = sudokuStyle;
 
     </SCRIPT>
 
-    <script src="ocrad.js"></script>
-    <script src="angular1_6_6.min.js"></script>
 </head>
 <body id="iBody" ng-app="sudokuLK" ng-controller="sudokuLKCtrl">
     <script>
-    var app = angular.module("sudokuLK", []);
-    app.controller("sudokuLKCtrl", ['$scope', '$log', function($scope, $log) {
-        $scope.$log = $log;
-        $scope.rows = [0,1,2,3,4,5,6,7,8];
-        $scope.cols = [0,1,2,3,4,5,6,7,8];
-        $scope.styleFor = function(row, col){
-            var style = {};
-            if (col == 0 || integerRemainder(col, 3) == 0) {
-                style.borderLeftWidth = "3px";
-                style.borderLeftColor = "black";
-                style.borderLeftStyle = "solid";
-            }
-            if (col == 8) {
-                style.borderRightWidth = "3px";
-                style.borderRightColor = "black";
-                style.borderRightStyle = "solid";
-            }
-            if (row == 8) {
-                style.borderBottomWidth = "3px";
-                style.borderBottomColor = "black";
-                style.borderBottomStyle = "solid";
-            }
-            if (row == 0 || integerRemainder(row, 3) == 0) {
-                style.borderTopWidth = "3px";
-                style.borderTopColor = "black";
-                style.borderTopStyle = "solid";
-            }
-            return style;
-        };
+        var app = angular.module("sudokuLK", []);
+        app.controller("sudokuLKCtrl", ['$scope', '$log', function($scope, $log) {
+            $scope.$log = $log;
+            $scope.rows = [0,1,2,3,4,5,6,7,8];
+            $scope.cols = [0,1,2,3,4,5,6,7,8];
+            
+            $scope.styleFor = function(row, col){
+                var style = {};
+                if (col == 0 || integerRemainder(col, 3) == 0) {
+                    style.borderLeftWidth = "3px";
+                    style.borderLeftColor = "black";
+                    style.borderLeftStyle = "solid";
+                }
+                if (col == 8) {
+                    style.borderRightWidth = "3px";
+                    style.borderRightColor = "black";
+                    style.borderRightStyle = "solid";
+                }
+                if (row == 8) {
+                    style.borderBottomWidth = "3px";
+                    style.borderBottomColor = "black";
+                    style.borderBottomStyle = "solid";
+                }
+                if (row == 0 || integerRemainder(row, 3) == 0) {
+                    style.borderTopWidth = "3px";
+                    style.borderTopColor = "black";
+                    style.borderTopStyle = "solid";
+                }
+                return style;
+            };
 
-        $scope.onKeyDown = function(key, row, col) {
- 
-            switch (key)
-            {
-                case "ArrowLeft":
-                col--;
-                break;
-
-                case "ArrowUp":
-                row--;
-                break;
-
-                case "ArrowRight":
-                col++;
-                break;
-
-                case "ArrowDown":
-                row++;
-                break;        
+            $scope.onKeyDown = function(key, row, col) {
+                switch (key)
+                {
+                    case "ArrowLeft":  col--; break;
+                    case "ArrowUp":    row--; break;
+                    case "ArrowRight": col++; break;
+                    case "ArrowDown":  row++; break;        
+                }
+                var nextElement = getCell("id", z9(row), z9(col));
+                nextElement.focus();    
             }
-            row = z9(row);
-            col = z9(col);
-            var nextElement = getCell("id", row, col);
-            nextElement.focus();    
-        }
-    }]);
+        }]);
 
     </script>
-    <!--style="sBody" class="cBody"-->
 
     <table >
         <tr ng-repeat="row in rows">
@@ -145,10 +130,9 @@ else window.onload = sudokuStyle;
             </td>
         </tr>
     </table>
-<!--    <button name="butGo" value="Go" type="button" onclick="butGo_Click()">Start!</button> -->
     <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()">Solve!</button>
 
-    <div   >
+    <div>
         <div>
             <p>Optionally, select an image from a sudoku game. It must be cropped to only the sudoku square.</p>
             <input type="file" onchange="load_file()" id="picker">  
@@ -158,56 +142,50 @@ else window.onload = sudokuStyle;
             <table >
                 <tr ng-repeat="row in rows">
                     <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
-                        <canvas
-                            id="{{'im'+row+col}}" 
-                            name="{{'img'+row+col}}" 
-                            alt="{{row+','+col}}"
-                            height="30"
-                            width="30" ></canvas>
+                        <canvas id="{{'im'+row+col}}" name="{{'img'+row+col}}" alt="{{row+','+col}}" height="30" width="30" ></canvas>
                     </td>
                 </tr>
             </table>            
         </div>
         <script TYPE="text/javascript">
 
-
             function load_file() {
+                var reader    = new FileReader();
 
-                var reader = new FileReader();
                 reader.onload = function(){
-                    var img = document.getElementById('sudokuImage');
-                    img.src = reader.result;
+                    var img   = document.getElementById('sudokuImage');
+                    img.src   = reader.result;
                 }
-                var picker = document.getElementById('picker');
-                var file = picker.files[0];
+
+                var picker    = document.getElementById('picker');
+                var file      = picker.files[0];
                 reader.readAsDataURL(file);
             }
 
             function recognize_image() {
-                var img = document.getElementById('sudokuImage');
+                var img           = document.getElementById('sudokuImage');
 
-                var height = Math.round(img.naturalHeight / 9);
-                var halfHeight = Math.round(height / 2);
+                var height        = Math.round(img.naturalHeight / 9);
+                var halfHeight    = Math.round(height / 2);
                 var quarterHeight = Math.round(halfHeight / 2);
-                var eigthHeight = Math.round(quarterHeight / 2);
-                var width = Math.round(img.naturalWidth / 9);
-                var halfWidth = Math.round(width / 2);
-                var quarterWidth = Math.round(halfWidth / 2);
-                var eigthWidth = Math.round(quarterWidth / 2);
+                var eigthHeight   = Math.round(quarterHeight / 2);
+                var width         = Math.round(img.naturalWidth / 9);
+                var halfWidth     = Math.round(width / 2);
+                var quarterWidth  = Math.round(halfWidth / 2);
+                var eigthWidth    = Math.round(quarterWidth / 2);
                 for (var i = 0; i < 9; i++) {
                     for (var j = 0; j < 9; j++) {        
-                        var canvas = document.getElementById('im'+i+j);
+                        var canvas  = document.getElementById('im'+i+j);
                         var context = canvas.getContext('2d');
                         var sourceX = (j * width) + quarterWidth - eigthWidth;
                         var sourceY = (i * height) + quarterHeight - eigthHeight;
                         context.drawImage(img, sourceX, sourceY, halfWidth + quarterWidth, halfHeight + quarterHeight, 0, 0, canvas.height, canvas.width);
-                        var text = OCRAD(canvas, { numeric: true });
-                        var id = "id" + i.toString() + j.toString();
-                        var el = document.getElementById(id);
-                        el.value = text;
+                        var text    = OCRAD(canvas, { numeric: true });
+                        var id      = "id" + i.toString() + j.toString();
+                        var el      = document.getElementById(id);
+                        el.value    = text;
                     }
                 }
-                sudokuStyle();
             }
 
         </script>
