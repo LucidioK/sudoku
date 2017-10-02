@@ -1,0 +1,168 @@
+<html  >
+<head>
+    <STYLE>
+        table {
+            background-color: white;
+            border-width: medium;
+            border-color: black;
+            border-collapse: collapse;
+        }
+
+        td {
+            background-color: white;
+            border: #000000 solid 1px;
+            width: 24pt;
+            height: 24pt;
+            text-align: center;
+            margin: 0pt;
+            padding: 0pt;
+            border-collapse: collapse; 
+        }
+
+        td:nth-child(3n+1)      { border-left-width:   3px; }
+        td:nth-child(9)         { border-right-width:  3px; }
+        tr:nth-of-type(3n+1) td { border-top-width:    3px; }
+        tr:nth-of-type(9)    td { border-bottom-width: 3px; }
+
+        input.sudokuNumber {
+            border: solid 1px;
+            background-color: transparent;
+            padding: 0pt;
+            font-size: 16pt;
+            width: 24pt;
+            max-width: 24pt;
+            height: 24pt;
+            max-height: 24pt;
+            font-family: arial,sans-serif;
+            text-align: center;
+            border-left-style: none;
+            border-right-style: none;
+            border-top-style: none;
+            border-bottom-style: none;
+            margin: 0pt;
+            size: 2;
+            auto-complete: off;
+            max-length: 1;
+        }
+
+        button {
+            height: 24pt;
+            font-family: arial,sans-serif;
+            font-size: 16pt;
+        }
+
+        div.mw { max-width: 240pt; }
+
+    </STYLE>
+
+    <SCRIPT src="sudokuSolver.js"></SCRIPT>
+
+    <script src="ocrad.js"></script>
+
+    <script src="angular1_6_6.min.js"></script>
+
+    <SCRIPT TYPE="text/javascript">
+
+        if (window.addEventListener)
+            window.addEventListener("load", sudokuStyle, false);
+        else if (window.attachEvent)
+            window.attachEvent("onload", sudokuStyle);
+        else window.onload = sudokuStyle;
+
+    </SCRIPT>
+
+</head>
+<body id="iBody" ng-app="sudokuLK" ng-controller="sudokuLKCtrl">
+    <script>
+        var app = angular.module("sudokuLK", []);
+        app.controller("sudokuLKCtrl", ['$scope', '$log', function($scope, $log) {
+            $scope.$log = $log;
+            $scope.rows = [0,1,2,3,4,5,6,7,8];
+            $scope.cols = [0,1,2,3,4,5,6,7,8];
+
+            $scope.onKeyDown = function(key, row, col) {
+                switch (key)
+                {
+                    case "ArrowLeft":  col--; break;
+                    case "ArrowUp":    row--; break;
+                    case "ArrowRight": col++; break;
+                    case "ArrowDown":  row++; break;        
+                }
+                var nextElement = getCell("id", z9(row), z9(col));
+                nextElement.focus();    
+            }
+        }]);
+
+    </script>
+
+    <table >
+        <tr ng-repeat="row in rows">
+            <td ng-repeat="col in cols"  >
+                <input class="sudokuNumber" id="{{'id'+row+col}}" name="{{'input'+row+col}}" onInput="onInput(this)" ng-keydown="onKeyDown($event.key, row, col)">
+            </td>
+        </tr>
+    </table>
+    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()">Solve!</button>
+
+    <div >
+        <div class="mw">
+            <p width="300pt" style="font-family: arial,sans-serif; font-size: 11pt;">Optionally, select an image from a sudoku game.
+            It must be cropped to only the sudoku square.</p>
+            <input type="file" style="font-family: arial,sans-serif; font-size: 11pt;" onchange="load_file()" id="picker">
+        </div>
+        <!-- The div below is invisible, used only for OCR -->
+        <div id="sudokuImageDiv" name="sudokuImageDiv" class="sudokuImageDiv" >
+            <img id="sudokuImage" width="270pt" height="270pt" onload="recognize_image()"> 
+            <table>
+                <tr ng-repeat="row in rows">
+                    <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
+                        <canvas id="{{'im'+row+col}}" name="{{'img'+row+col}}" alt="{{row+','+col}}" height="30" width="30" ></canvas>
+                    </td>
+                </tr>
+            </table>            
+        </div>
+        <script TYPE="text/javascript">
+
+            function load_file() {
+                var reader    = new FileReader();
+
+                reader.onload = function(){
+                    var img   = document.getElementById('sudokuImage');
+                    img.src   = reader.result;
+                }
+
+                var picker    = document.getElementById('picker');
+                var file      = picker.files[0];
+                reader.readAsDataURL(file);
+            }
+
+            function recognize_image() {
+                var img           = document.getElementById('sudokuImage');
+
+                var height        = Math.round(img.naturalHeight / 9);
+                var halfHeight    = Math.round(height / 2);
+                var quarterHeight = Math.round(halfHeight / 2);
+                var eigthHeight   = Math.round(quarterHeight / 2);
+                var width         = Math.round(img.naturalWidth / 9);
+                var halfWidth     = Math.round(width / 2);
+                var quarterWidth  = Math.round(halfWidth / 2);
+                var eigthWidth    = Math.round(quarterWidth / 2);
+                for (var i = 0; i < 9; i++) {
+                    for (var j = 0; j < 9; j++) {        
+                        var canvas  = document.getElementById('im'+i+j);
+                        var context = canvas.getContext('2d');
+                        var sourceX = (j * width) + quarterWidth - eigthWidth;
+                        var sourceY = (i * height) + quarterHeight - eigthHeight;
+                        context.drawImage(img, sourceX, sourceY, halfWidth + quarterWidth, halfHeight + quarterHeight, 0, 0, canvas.height, canvas.width);
+                        var text    = OCRAD(canvas, { numeric: true });
+                        var id      = "id" + i.toString() + j.toString();
+                        var el      = document.getElementById(id);
+                        el.value    = text;
+                    }
+                }
+            }
+
+        </script>
+     </div>  
+</body>
+</html>
