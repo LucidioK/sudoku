@@ -1,258 +1,168 @@
-<html>
+<html  >
 <head>
     <STYLE>
-table {
-    background-color: white;
-    border-width: medium;
-    border-color: black;
-    border-collapse: collapse;
-}
+        table {
+            background-color: white;
+            border-width: medium;
+            border-color: black;
+            border-collapse: collapse;
+        }
 
-td {
-    background-color: white;
-    border: #000000 solid 1px;
-    width: 24pt;
-    height: 24pt;
-    /*font-family: arial,sans-serif;
-font-size: 9pt;*/
-    text-align: center;
-    /*border-style: solid 1px black;*/
-    margin: 0pt;
-    padding: 0pt;
-    border-collapse: collapse; /*background-color:#FFFFFF; border-right: #666699 solid 2px;*/
-}
+        td {
+            background-color: white;
+            border: #000000 solid 1px;
+            width: 24pt;
+            height: 24pt;
+            text-align: center;
+            margin: 0pt;
+            padding: 0pt;
+            border-collapse: collapse; 
+        }
 
-input.sudokuNumber {
-    border: solid 1px;
-    background-color: transparent;
-    padding: 0pt;
-    font-size: 16pt;
-    width: 24pt;
-    max-width: 24pt;
-    height: 24pt;
-    max-height: 24pt;
-    font-family: arial,sans-serif;
-    text-align: center;
-    border-left-style: none;
-    border-right-style: none;
-    border-top-style: none;
-    border-bottom-style: none;
-    margin: 0pt;
-    size: 2;
-}
+        td:nth-child(3n+1)      { border-left-width:   3px; }
+        td:nth-child(9)         { border-right-width:  3px; }
+        tr:nth-of-type(3n+1) td { border-top-width:    3px; }
+        tr:nth-of-type(9)    td { border-bottom-width: 3px; }
 
+        input.sudokuNumber {
+            border: solid 1px;
+            background-color: transparent;
+            padding: 0pt;
+            font-size: 16pt;
+            width: 24pt;
+            max-width: 24pt;
+            height: 24pt;
+            max-height: 24pt;
+            font-family: arial,sans-serif;
+            text-align: center;
+            border-left-style: none;
+            border-right-style: none;
+            border-top-style: none;
+            border-bottom-style: none;
+            margin: 0pt;
+            size: 2;
+            auto-complete: off;
+            max-length: 1;
+        }
 
+        button {
+            height: 24pt;
+            font-family: arial,sans-serif;
+            font-size: 16pt;
+        }
 
-button {
-    height: 24pt;
-    /*width: 48pt;*/
-    font-family: arial,sans-serif;
-    font-size: 16pt;
-}        
+        div.mw { max-width: 240pt; }
 
     </STYLE>
+
     <SCRIPT src="sudokuSolver.js"></SCRIPT>
 
-<SCRIPT TYPE="text/javascript">
+    <script src="ocrad.js"></script>
 
+    <script src="angular1_6_6.min.js"></script>
 
+    <SCRIPT TYPE="text/javascript">
 
-if (window.addEventListener)
-    window.addEventListener("load", sudokuStyle, false);
-else if (window.attachEvent)
-    window.attachEvent("onload", sudokuStyle);
-else window.onload = sudokuStyle;
-
-
+        if (window.addEventListener)
+            window.addEventListener("load", sudokuStyle, false);
+        else if (window.attachEvent)
+            window.attachEvent("onload", sudokuStyle);
+        else window.onload = sudokuStyle;
 
     </SCRIPT>
 
-    <script src="ocrad.js"></script>
 </head>
-<body id="iBody">
+<body id="iBody" ng-app="sudokuLK" ng-controller="sudokuLKCtrl">
+    <script>
+        var app = angular.module("sudokuLK", []);
+        app.controller("sudokuLKCtrl", ['$scope', '$log', function($scope, $log) {
+            $scope.$log = $log;
+            $scope.rows = [0,1,2,3,4,5,6,7,8];
+            $scope.cols = [0,1,2,3,4,5,6,7,8];
 
-    <!--style="sBody" class="cBody"-->
-
-    <table >
-        <tr>
-            <td id="td00"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input00" id="id00" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td01"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input01" id="id01" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td02"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input02" id="id02" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td03"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input03" id="id03" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td04"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input04" id="id04" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td05"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input05" id="id05" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td06"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input06" id="id06" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td07"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input07" id="id07" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td08"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input08" id="id08" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td10"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input10" id="id10" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td11"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input11" id="id11" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td12"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input12" id="id12" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td13"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input13" id="id13" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td14"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input14" id="id14" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td15"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input15" id="id15" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td16"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input16" id="id16" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td17"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input17" id="id17" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td18"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input18" id="id18" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td20"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input20" id="id20" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td21"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input21" id="id21" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td22"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input22" id="id22" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td23"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input23" id="id23" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td24"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input24" id="id24" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td25"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input25" id="id25" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td26"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input26" id="id26" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td27"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input27" id="id27" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td28"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input28" id="id28" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td30"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input30" id="id30" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td31"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input31" id="id31" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td32"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input32" id="id32" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td33"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input33" id="id33" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td34"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input34" id="id34" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td35"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input35" id="id35" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td36"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input36" id="id36" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td37"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input37" id="id37" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td38"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input38" id="id38" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td40"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input40" id="id40" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td41"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input41" id="id41" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td42"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input42" id="id42" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td43"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input43" id="id43" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td44"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input44" id="id44" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td45"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input45" id="id45" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td46"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input46" id="id46" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td47"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input47" id="id47" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td48"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input48" id="id48" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td50"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input50" id="id50" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td51"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input51" id="id51" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td52"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input52" id="id52" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td53"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input53" id="id53" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td54"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input54" id="id54" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td55"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input55" id="id55" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td56"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input56" id="id56" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td57"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input57" id="id57" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td58"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input58" id="id58" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td60"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input60" id="id60" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td61"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input61" id="id61" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td62"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input62" id="id62" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td63"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input63" id="id63" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td64"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input64" id="id64" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td65"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input65" id="id65" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td66"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input66" id="id66" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td67"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input67" id="id67" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td68"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input68" id="id68" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td70"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input70" id="id70" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td71"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input71" id="id71" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td72"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input72" id="id72" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td73"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input73" id="id73" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td74"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input74" id="id74" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td75"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input75" id="id75" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td76"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input76" id="id76" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td77"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input77" id="id77" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td78"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input78" id="id78" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-        <tr>
-            <td id="td80"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input80" id="id80" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td81"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input81" id="id81" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td82"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input82" id="id82" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td83"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input83" id="id83" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td84"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input84" id="id84" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td85"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input85" id="id85" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td86"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input86" id="id86" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td87"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input87" id="id87" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-            <td id="td88"><input class="sudokuNumber" size="2" autocomplete="off" maxlength="1" name="input88" id="id88" onBlur="onBlur(this)" onInput="onInput(this)" onKeyDown="onKeyDown(this)"value=""></td>
-        </tr>
-    </table>
-    <button name="butGo" value="Go" type="button" onclick="butGo_Click()">Start!</button>
-    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()" disabled>Solve!</button>
-<!--    
-    <div id="capturer" name="capturer" >
-        <div id="capturerURL" name="capturerURL">
-            <input autocomplete="off" name="capturerURLText" id="capturerURLText" value="http://www.sudoku.com"     
-                    border="solid 1px"
-                    border-color="black"
-                    background-color="transparent"
-                    width="auto"
-                    max-width="216pt"
-                    padding="8pt"
-                    font-size="16pt"
-                    font-family="arial,sans-serif"
-                    text-align="left"
-                    margin="1pt">
-        </div>
-        <div id="capturerURL" name="capturerURL">
-            <button id="butCaptureFromURL" name="butCaptureFromURL" value="CaptureFromURL" type="button" onclick="butCaptureFromURL_Click()" >Load URL</button>
-            <button id="butCaptureZoomIn"  name="butCaptureZoomIn"  value="CaptureZoomIn"  type="button" onclick="butCaptureZoomIn_Click()"  >Zoom In</button>
-            <button id="butCaptureZoomOut" name="butCaptureZoomOut" value="CaptureZoomOut" type="button" onclick="butCaptureZoomOut_Click()"  >Zoom Out</button>
-        </div>
-        <div>
-            <iframe id="captureIFrame" name="captureIFrame" src="" height="320pt" width="216pt" zoom="100%" border="solid 1px" border-color="black"></iframe>
-        </div>
-    </div>
--->    
-        <div>
-        <!-- <button id="butFromFile" name="butFromFile" value="FromFile" type="button" onclick="butFromFile_Click()" >From File</button> -->
-        <div>
-            <input type="file" onchange="load_file()" id="picker">  
-            <canvas id="ocradCanvas"></canvas>
-            <img id="ocradCell">
-        </div>
-        <div id="sudokuImageDiv" name="sudokuImageDiv">
-            <img id="sudokuImage" width="240pt" height="240pt" onload="recognize_image()">
-        </div>
-            <script TYPE="text/javascript">
-function load_file () {
-
-    var reader = new FileReader();
-    reader.onload = function(){
-        var img = document.getElementById('sudokuImage');
-        img.src = reader.result;
-    }
-    var picker = document.getElementById('picker');
-    var file = picker.files[0];
-    reader.readAsDataURL(file);
-}
-
-function recognize_image() {
-    var img = document.getElementById('sudokuImage');
-    var cell = document.getElementById('ocradCell');
-    var canvas = document.getElementById('ocradCanvas');
-    var context = canvas.getContext('2d');
-    var height = Math.round(img.height / 9);
-    var halfHeight = Math.round(height / 2);
-    var quarterHeight = Math.round(halfHeight / 2);
-    var width = Math.round(img.width / 9);
-    var halfWidth = Math.round(width / 2);
-    var quarterWidth = Math.round(halfWidth / 2);
-    for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {        
-            var sourceX = (i * width) + quarterWidth ;
-            var sourceY = (j * height) + quarterWidth;
-console.log("load_file "+i+" "+j+" " +sourceX + " "+sourceY);
-            context.drawImage(cell, sourceX, sourceY, halfWidth, halfHeight, 0, 0, halfWidth, halfHeight);
-/*                    
-                OCRAD(img, function(text){
-                    var id = "id" + i.toString() + j.toString();
-                    document.getElementById(id).innerText = text;
-console.log("load_file OCRAD "+id+" "+text);
-                });
-*/                    
-        }
-    }
-}
+            $scope.onKeyDown = function(key, row, col) {
+                switch (key)
+                {
+                    case "ArrowLeft":  col--; break;
+                    case "ArrowUp":    row--; break;
+                    case "ArrowRight": col++; break;
+                    case "ArrowDown":  row++; break;        
+                }
+                var nextElement = getCell("id", z9(row), z9(col));
+                nextElement.focus();    
+            }
+        }]);
 
     </script>
+
+    <table >
+        <tr ng-repeat="row in rows">
+            <td ng-repeat="col in cols"  >
+                <input class="sudokuNumber" id="{{'id'+row+col}}" name="{{'input'+row+col}}" onInput="onInput(this)" ng-keydown="onKeyDown($event.key, row, col)">
+            </td>
+        </tr>
+    </table>
+    <button id="butSolve" name="butSolve" value="Solve" type="button" onclick="butSolve_Click()">Solve!</button>
+
+    <div >
+        <div class="mw">
+            <p width="300pt" style="font-family: arial,sans-serif; font-size: 11pt;">Optionally, select an image from a sudoku game.
+            It must be cropped to only the sudoku square.</p>
+            <input type="file" style="font-family: arial,sans-serif; font-size: 11pt;" onchange="load_file()" id="picker">
+        </div>
+        <!-- The div below is invisible, used only for OCR -->
+        <div id="sudokuImageDiv" name="sudokuImageDiv" class="sudokuImageDiv" >
+            <img id="sudokuImage" width="270pt" height="270pt" onload="recognize_image()"> 
+            <table>
+                <tr ng-repeat="row in rows">
+                    <td ng-repeat="col in cols" ng-style="styleFor(row,col)" >
+                        <canvas id="{{'im'+row+col}}" name="{{'img'+row+col}}" alt="{{row+','+col}}" height="30" width="30" ></canvas>
+                    </td>
+                </tr>
+            </table>            
+        </div>
+        <script TYPE="text/javascript">
+
+            function load_file() {
+                var reader    = new FileReader();
+
+                reader.onload = function(){
+                    var img   = document.getElementById('sudokuImage');
+                    img.src   = reader.result;
+                }
+
+                var picker    = document.getElementById('picker');
+                var file      = picker.files[0];
+                reader.readAsDataURL(file);
+            }
+
+            function recognize_image() {
+                var img           = document.getElementById('sudokuImage');
+
+                var height        = Math.round(img.naturalHeight / 9);
+                var halfHeight    = Math.round(height / 2);
+                var quarterHeight = Math.round(halfHeight / 2);
+                var eigthHeight   = Math.round(quarterHeight / 2);
+                var width         = Math.round(img.naturalWidth / 9);
+                var halfWidth     = Math.round(width / 2);
+                var quarterWidth  = Math.round(halfWidth / 2);
+                var eigthWidth    = Math.round(quarterWidth / 2);
+                for (var i = 0; i < 9; i++) {
+                    for (var j = 0; j < 9; j++) {        
+                        var canvas  = document.getElementById('im'+i+j);
+                        var context = canvas.getContext('2d');
+                        var sourceX = (j * width) + quarterWidth - eigthWidth;
+                        var sourceY = (i * height) + quarterHeight - eigthHeight;
+                        context.drawImage(img, sourceX, sourceY, halfWidth + quarterWidth, halfHeight + quarterHeight, 0, 0, canvas.height, canvas.width);
+                        var text    = OCRAD(canvas, { numeric: true });
+                        var id      = "id" + i.toString() + j.toString();
+                        var el      = document.getElementById(id);
+                        el.value    = text;
+                    }
+                }
+            }
+
+        </script>
      </div>  
 </body>
 </html>
