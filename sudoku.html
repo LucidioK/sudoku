@@ -153,6 +153,8 @@
                         var context = canvas.getContext('2d');
                         var sourceX = (j * width) + quarterWidth - eigthWidth;
                         var sourceY = (i * height) + quarterHeight - eigthHeight;
+                        canvas.width = halfWidth + quarterWidth;
+                        canvas.height = halfHeight + quarterHeight;
                         context.drawImage(img, sourceX, sourceY, halfWidth + quarterWidth, halfHeight + quarterHeight, 0, 0, canvas.height, canvas.width);
                         var text    = OCRAD(canvas, { numeric: true });
                         var id      = "id" + i.toString() + j.toString();
