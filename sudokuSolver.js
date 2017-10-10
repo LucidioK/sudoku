@@ -96,6 +96,8 @@ function SudokuMatrix() {
     this.solutionCandidateIteratorPosition = 0;
     this.acceptable = this.listToBigNumber([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     this.foundSolution = false;
+    this.offendingRow = -1;
+    this.offendingColumn = -1;
 };
 
 SudokuMatrix.prototype = new IntListMatrix(9, 9);
@@ -341,11 +343,33 @@ SudokuMatrix.prototype.copyMatrix = function(m) {
     return newM;
 }
 
+SudokuMatrix.prototype.checkInitialState = function() {
+    for (var i = 0; i < this.h; i++) {
+        for (var j = 0; j < this.w; j++) {
+            if (this.m[i][j] != 0) {
+                var v = this.m[i][j];
+                this.m[i][j] = 0;
+                if (!this.isValueAcceptableInM(v, i, j)) {
+                    this.offendingRow = i;
+                    this.offendingColumn = j;
+                    return false;
+                }
+                this.m[i][j] = v;
+            }   
+        }
+    }
+    return true;
+}
+
+
 SudokuMatrix.prototype.FindSolution = function() {
+    if (!this.checkInitialState()) {
+        return false;
+    }
     this.m = this.lowHangingFruits(this.m);
     if (this.isMatrixAcceptable(this.m)) {
         this.foundSolution = true;
-        return this.m;
+        return true;
     }
     var l = this.getCandidateList(this.m);
     //console.log(this.candidateListToString(l));
@@ -397,7 +421,7 @@ SudokuMatrix.prototype.FindSolution = function() {
         l = this.getCandidateList(this.m);
         //console.log(this.candidateListToString(l));
     }
-    return null;
+    return true;
 }
 
 SudokuMatrix.prototype.getColumn = function(m, j) {
@@ -564,7 +588,7 @@ function butGo_Click() {
 }
 
 function butSolve_Click(){
-    butGo_Click();
+
     var m = new SudokuMatrix;
     for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
@@ -575,16 +599,21 @@ function butSolve_Click(){
             }
         }
     }
-    m.FindSolution();
-    for (var i = 0; i < 9; i++) {
-        for (var j = 0; j < 9; j++) {
-            var inputCell = getCell("id", i, j);
-            if (inputCell.value == "")
-            {
-
-                inputCell.value = m.getAt(i, j);
+    if (m.FindSolution()) {
+        butGo_Click();
+        for (var i = 0; i < 9; i++) {
+            for (var j = 0; j < 9; j++) {
+                var inputCell = getCell("id", i, j);
+                if (inputCell.value == "")
+                {
+                    inputCell.value = m.getAt(i, j);
+                }
             }
         }
+    } else {
+        alert("Could not solve sudoku, check initial values.");
+        var offendingCell = getCell("id", m.offendingRow, m.offendingColumn);
+        offendingCell.style.backgroundColor = "red";
     }
 
 }
@@ -671,6 +700,7 @@ function onInput(element) {
         var prefix = getIdPrefix(element.id);
         var i = getIdI(element.id);
         var j = getIdJ(element.id);
+        element.style.backgroundColor = "white";
         var nextElement = getNextCell(prefix, i, j);
         nextElement.focus();
     }
