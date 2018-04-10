@@ -564,6 +564,19 @@ function sudokuStyle() {
     }
 }
 
+function clearPuzzle() {
+    var sid = document.getElementById("sudokuImageDiv");
+    sid.style.display = 'none';
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            var inputCell = getCell("id", i, j);
+            inputCell.style.backgroundColor = "white";
+            inputCell.disabled = false;
+            inputCell.value = "";
+        }
+    }
+}
+
 
 function randomPopulate() {
     for (var i = 0; i < 9; i++) {

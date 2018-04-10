@@ -109,6 +109,7 @@
             <p width="300pt" style="font-family: arial,sans-serif; font-size: 11pt;">Optionally, select an image from a sudoku game.
             It must be cropped to only the sudoku square.</p>
             <input type="file" style="font-family: arial,sans-serif; font-size: 11pt;" onchange="load_file()" id="picker">
+            <input style="font-family: arial,sans-serif; font-size: 11pt;" id="status" readonly="true" width="300pt" >
         </div>
         <!-- The div below is invisible, used only for OCR -->
         <div id="sudokuImageDiv" name="sudokuImageDiv" class="sudokuImageDiv" >
@@ -124,6 +125,8 @@
         <script TYPE="text/javascript">
 
             function load_file() {
+                document.getElementById('status').value = 'Loading file...';
+                clearPuzzle();
                 var reader    = new FileReader();
 
                 reader.onload = function(){
@@ -137,6 +140,7 @@
             }
 
             function recognize_image() {
+                document.getElementById('status').value = 'OCR...';
                 var img           = document.getElementById('sudokuImage');
 
                 var height        = Math.round(img.naturalHeight / 9);
@@ -148,7 +152,9 @@
                 var quarterWidth  = Math.round(halfWidth / 2);
                 var eigthWidth    = Math.round(quarterWidth / 2);
                 for (var i = 0; i < 9; i++) {
-                    for (var j = 0; j < 9; j++) {        
+                    for (var j = 0; j < 9; j++) {   
+                        var count = (i * 9) + j + 1;
+                        document.getElementById('status').value = ('OCR ' + count.toString() + '/81');     
                         var canvas  = document.getElementById('im'+i+j);
                         var context = canvas.getContext('2d');
                         var sourceX = (j * width) + quarterWidth - eigthWidth;
@@ -167,6 +173,7 @@
 
             function recognize_image_post_process()
             {
+                document.getElementById('status').value = 'Post processing...';
                 var mustCull = false;
                 for (var i = 0; i < 9 && !mustCull; i++) {
                     for (var j = 0; j < 9 && !mustCull; j++) {        
@@ -184,6 +191,7 @@
                         }
                     }                    
                 }
+                document.getElementById('status').value = 'Done.';
             }
 
             function getCellValue(row, col) {
