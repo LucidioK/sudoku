@@ -162,6 +162,32 @@
                         el.value    = text;
                     }
                 }
+                recognize_image_post_process();
+            }
+
+            function recognize_image_post_process()
+            {
+                var mustCull = false;
+                for (var i = 0; i < 9 && !mustCull; i++) {
+                    for (var j = 0; j < 9 && !mustCull; j++) {        
+                        var vl = getCellValue(i, j);
+                        mustCull = vl.length > 1;
+                    }
+                }
+
+                if (mustCull) {
+                    for (var i = 0; i < 9; i++) {
+                        for (var j = 0; j < 9; j++) {        
+                            var el = getCell("id", i, j);
+                            var vl = el.value;
+                            el.value = vl.length > 1 ? vl.substring(0,1) : "";
+                        }
+                    }                    
+                }
+            }
+
+            function getCellValue(row, col) {
+                return getCell("id", row, col).value;
             }
 
         </script>

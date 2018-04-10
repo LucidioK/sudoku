@@ -536,7 +536,7 @@ function getNextCell(prefix, i, j) {
 }
 
 function getCell(prefix, i, j) {
-    var id = prefix + i + j;
+    var id = prefix + i.toString() + j.toString();
     var x = document.getElementById(id);
     return x;
 }
